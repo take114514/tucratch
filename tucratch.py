@@ -6,7 +6,6 @@ import serial
 import threading
 from flask import Flask
 import wx
-import jinja2.ext
 import json
 global ser
 global name
