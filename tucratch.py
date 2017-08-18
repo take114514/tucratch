@@ -81,23 +81,23 @@ def bridge(id):
 
 
 #motor
-@app.route('/motor/<data>', methods=['GET'])
-def motor(data):
+@app.route('/motor/<id>/<data>', methods=['GET'])
+def motor(id, data):
     command = "post -b 1005-0 -p 1 -t int16 " + str(data) + "\n"
     ser.write(command.encode())
     ser.readline()
     return 'OK'
 
-@app.route('/motorstop', methods=['GET'])
-def motorstop():
+@app.route('/motorstop/<id>', methods=['GET'])
+def motorstop(id):
     command = "post -b 1005-0 -p 1 -t int16 0\n"
     ser.write(command.encode())
     ser.readline()
     return 'OK'
 
 #LEDs
-@app.route('/<port>/<data>', methods=['GET'])
-def led(port, data):
+@app.route('/<port>/<id>/<data>', methods=['GET'])
+def led(port, id, data):
     if port == "red":
         led = 1
     elif port == "green":
@@ -109,8 +109,8 @@ def led(port, data):
     ser.readline()
     return 'OK'
 
-@app.route('/leds/<red>/<green>/<blue>', methods=['GET'])
-def leds(red, green, blue):
+@app.route('/leds/<id>/<red>/<green>/<blue>', methods=['GET'])
+def leds(id, red, green, blue):
     command1 = "post -b 1001-0 -p 1 -t int16 " + str(red) + "\n"
     ser.write(command1.encode())
     ser.readline()
