@@ -3,8 +3,9 @@
     "extensionPort": 5000,
     "blockSpecs": [
         ["w", "つまみをみる", "knob", 0],
-        ["w", "つまみをリセット", "knobreset", 0],
+        ["w", "つまみボタンをみる", "knobbutton", 0],
         ["r", "つまみのかいてんすう", "knobdata"],
+        ["r", "つまみボタンおした？", "knobbuttondata"],
         ["w", "おんどをはかる", "temp", 0],
         ["r", "おんど", "tempdata"],
         ["w", "きあつをはかる", "pascal", 0],

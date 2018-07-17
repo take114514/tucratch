@@ -1,41 +1,22 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 
-import sys
 import webbrowser
-import glob
 import serial
+import serial.tools.list_ports
 import json
 from flask import Flask, render_template, request, redirect
-
-
-global ser
-global name
 
 
 '''------Functions------'''
 
 
 def serial_ports():
-    if sys.platform.startswith('win'):
-        ports = ['COM%s' % (i + 1) for i in range(256)]
-    elif sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
-        # this excludes your current terminal "/dev/tty"
-        ports = glob.glob('/dev/tty[A-Za-z]*')
-    elif sys.platform.startswith('darwin'):
-        ports = glob.glob('/dev/tty.*')
-    else:
-        raise EnvironmentError('Unsupported platform')
-
-    result = []
+    ports = serial.tools.list_ports.comports()
+    port_list = []
     for port in ports:
-        try:
-            s = serial.Serial(port)
-            s.close()
-            result.append(port)
-        except (OSError, serial.SerialException):
-            pass
-    return result
+        port_list.append(port.device)
+    return port_list
 
 
 '''-----Main Activity-----'''
@@ -58,7 +39,12 @@ datas = {
 
 @app.route('/', methods=['GET'])
 def index():
-    return render_template('index.html', ports=serial_ports())
+    if 'ser' in globals():
+        if ser.is_open:
+            status = 'ConnectingSuccess!'
+    else:
+        status = ''
+    return render_template('index.html', ports=serial_ports(), status=status)
 
 
 '''-----Scratch Comander-----'''
@@ -67,6 +53,7 @@ def index():
 def res():
     global datas
     responce = 'knobdata ' + datas["knob"] + '\n' + \
+               'knobbuttondata ' + datas["knobbutton"] + '\n' + \
                'tempdata ' + datas["temp"] + '\n' + \
                'humiddata ' + datas["humid"] + '\n' + \
                'pascaldata ' + datas["pascal"] + '\n' + \
@@ -117,11 +104,13 @@ def knob(id):
     return 'OK'
 
 
-@app.route('/knobreset/<id>', methods=['GET'])
-def knobreset(id):
-    command = "/1007-0/1/0\n"
+@app.route('/knobbutton/<id>', methods=['GET'])
+def knobbutton(id):
+    command = "/1007-0/2/\n"
     ser.write(command.encode())
-    ser.readline()
+    line = ser.readline()
+    data = json.loads(line)
+    datas['knobbutton'] = str(data.get('data'))
     return 'OK'
 
 
@@ -244,4 +233,4 @@ def postport():
         ser = serial.Serial(port, 9600)
     return redirect("http://127.0.0.1:5000/", code=302)
 
-app.run()
+app.run(threaded=True)
