@@ -1,24 +1,29 @@
-{ "extensionName": "tucratch",
- "extensionPort": 5000,
- "blockSpecs": [
-["w", "つまみをみる", "knob"],
-["w", "つまみをリセット", "knobreset"],
-["r", "つまみのかいてんすう", "knobdata"],
-["w", "おんどをはかる", "temp"],
-["r", "おんど", "tempdata"],
-["w", "きあつをはかる", "pascal"],
-["r", "きあつ", "pascaldata"],
-["w", "しつどをはかる", "humid"],
-["r", "しつど", "humiddata"],
-["w", "LEDのあかをつける いろ %n", "red", 0],
-["w", "LEDのみどりをつける いろ %n", "green", 0],
-["w", "LEDのあおをつける いろ %n", "blue", 0],
-["w", "LEDをつける いろ %n%n%n", "leds", 0],
-["w", "phをはかる", "ph"],
-["r", "ph", "phdata"],
-["w", "CO2をはかる", "co2"],
-["r", "CO2", "co2data"],
-["w", "おんどをはかる(CO2)", "co2temp"],
-["r", "おんど(CO2)", "co2tempdata"]
- ]
+{
+    "extensionName": "tucratch",
+    "extensionPort": 5000,
+    "blockSpecs": [
+        ["w", "つまみをみる", "knob", 0],
+        ["w", "つまみをリセット", "knobreset", 0],
+        ["r", "つまみのかいてんすう", "knobdata"],
+        ["w", "おんどをはかる", "temp", 0],
+        ["r", "おんど", "tempdata"],
+        ["w", "きあつをはかる", "pascal", 0],
+        ["r", "きあつ", "pascaldata"],
+        ["w", "しつどをはかる", "humid", 0],
+        ["r", "しつど", "humiddata"],
+        ["w", "LEDのあかをつける いろ %n", "red", 0],
+        ["w", "LEDのみどりをつける いろ %n", "green", 0],
+        ["w", "LEDのあおをつける いろ %n", "blue", 0],
+        ["w", "LEDをつける いろ %n%n%n", "leds", 0],
+        ["w", "phをはかる", "ph", 0],
+        ["r", "ph", "phdata"],
+        ["w", "CO2をはかる", "co2", 0],
+        ["r", "CO2", "co2data"],
+        ["w", "おんどをはかる(CO2)", "co2temp", 0],
+        ["r", "おんど(CO2)", "co2tempdata"]
+        ["w", "モーター1をまわす %n", "motor_rotate1", 0],
+        ["w", "モーター1をとめる", "motor_stop1", 0],
+        ["w", "モーター2をまわす %n", "motor_rotate2", 0],
+        ["w", "モーター2をとめる", "motor_stop2", 0]
+    ]
 }

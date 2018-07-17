@@ -62,7 +62,13 @@ datas = {
 @app.route('/poll', methods=['GET'])
 def res():
     global datas
-    responce = 'knobdata ' + datas["knob"] + '\n' + 'tempdata ' + datas["temp"] + '\n' + 'humiddata ' + datas["humid"] + '\n' + 'pascaldata ' + datas["pascal"] + '\n' + 'phdata ' + datas["ph"] + '\n' + 'co2data ' + datas["co2"] + '\n' + 'co2tempdata ' + datas["co2temp"] + '\n'
+    responce = 'knobdata ' + datas["knob"] + '\n' + \
+               'tempdata ' + datas["temp"] + '\n' + \
+               'humiddata ' + datas["humid"] + '\n' + \
+               'pascaldata ' + datas["pascal"] + '\n' + \
+               'phdata ' + datas["ph"] + '\n' + \
+               'co2data ' + datas["co2"] + '\n' + \
+               'co2tempdata ' + datas["co2temp"] + '\n'
     return responce
 
 #LEDs
@@ -74,7 +80,7 @@ def led(port, id, data):
         led = 2
     elif port == "blue":
         led = 3
-    command = "post -b 1001-0 -p " + str(led) + " -t int16 " + str(data) + "\n"
+    command = "/1001-0/" + str(led) + "/" + str(data) + "\n"
     ser.write(command.encode())
     ser.readline()
     return 'OK'
@@ -177,6 +183,36 @@ def co2temp(id):
     line = ser.readline()
     data = json.loads(line)
     datas['co2temp'] = str(data.get('data'))
+    return 'OK'
+
+#motor1
+@app.route('/motor_rotate1/<id>/<data>', methods=['GET'])
+def motor_rotate1(id, data):
+    command = "/1005-0/1/" + str(data) + "\n"
+    ser.write(command.encode())
+    ser.readline()
+    return 'OK'
+
+@app.route('/motor_stop1/<id>', methods=['GET'])
+def motor_stop1(id):
+    command = "/1005-0/1/0\n"
+    ser.write(command.encode())
+    ser.readline()
+    return 'OK'
+
+#motor2
+@app.route('/motor_rotate2/<id>/<data>', methods=['GET'])
+def motor_rotate2(id, data):
+    command = "/1005-0/2/" + str(data) + "\n"
+    ser.write(command.encode())
+    ser.readline()
+    return 'OK'
+
+@app.route('/motor_stop2/<id>', methods=['GET'])
+def motor_stop2(id):
+    command = "/1005-0/2/0\n"
+    ser.write(command.encode())
+    ser.readline()
     return 'OK'
 
 '''-----Define wxPython Activity-----'''
