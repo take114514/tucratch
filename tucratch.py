@@ -1,16 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
+
 import sys
+import webbrowser
 import glob
 import serial
-import threading
-from flask import Flask
-import wx
 import json
+from flask import Flask, render_template, request, redirect
+
+
 global ser
 global name
 
+
 '''------Functions------'''
+
 
 def serial_ports():
     if sys.platform.startswith('win'):
@@ -33,19 +37,10 @@ def serial_ports():
             pass
     return result
 
-def combobox_event(event):
-    global name
-    obj = event.GetEventObject()
-    name = obj.GetStringSelection()
-    server.start()
 
-def run_server():
-    global ser
-    global name
-    ser = serial.Serial(name, 9600)
-    app.run()
+'''-----Main Activity-----'''
 
-'''-----Define Frask Activity-----'''
+webbrowser.open('http://127.0.0.1:5000/')
 
 app = Flask(__name__)
 datas = {
@@ -58,6 +53,15 @@ datas = {
     "co2temp": "0"
 }
 
+'''-----Web UI-----'''
+
+
+@app.route('/', methods=['GET'])
+def index():
+    return render_template('index.html', ports=serial_ports())
+
+
+'''-----Scratch Comander-----'''
 #Polling
 @app.route('/poll', methods=['GET'])
 def res():
@@ -70,6 +74,7 @@ def res():
                'co2data ' + datas["co2"] + '\n' + \
                'co2tempdata ' + datas["co2temp"] + '\n'
     return responce
+
 
 #LEDs
 @app.route('/<port>/<id>/<data>', methods=['GET'])
@@ -84,6 +89,7 @@ def led(port, id, data):
     ser.write(command.encode())
     ser.readline()
     return 'OK'
+
 
 @app.route('/leds/<id>/<red>/<green>/<blue>', methods=['GET'])
 def leds(id, red, green, blue):
@@ -118,6 +124,7 @@ def knobreset(id):
     ser.readline()
     return 'OK'
 
+
 #temp
 @app.route('/temp/<id>', methods=['GET'])
 def temp(id):
@@ -128,6 +135,7 @@ def temp(id):
     data = json.loads(line)
     datas['temp'] = str(data.get('data'))
     return 'OK'
+
 
 #humid
 @app.route('/humid/<id>', methods=['GET'])
@@ -152,6 +160,7 @@ def pascal(id):
     datas['pascal'] = str(data.get('data'))
     return 'OK'
 
+
 #ph
 @app.route('/ph/<id>', methods=['GET'])
 def ph(id):
@@ -162,6 +171,7 @@ def ph(id):
     data = json.loads(line)
     datas['ph'] = str(data.get('data'))
     return 'OK'
+
 
 #co2
 @app.route('/co2/<id>', methods=['GET'])
@@ -174,6 +184,7 @@ def co2(id):
     datas['co2'] = str(data.get('data'))
     return 'OK'
 
+
 #co2-temp
 @app.route('/co2temp/<id>', methods=['GET'])
 def co2temp(id):
@@ -185,6 +196,7 @@ def co2temp(id):
     datas['co2temp'] = str(data.get('data'))
     return 'OK'
 
+
 #motor1
 @app.route('/motor_rotate1/<id>/<data>', methods=['GET'])
 def motor_rotate1(id, data):
@@ -193,12 +205,14 @@ def motor_rotate1(id, data):
     ser.readline()
     return 'OK'
 
+
 @app.route('/motor_stop1/<id>', methods=['GET'])
 def motor_stop1(id):
     command = "/1005-0/1/0\n"
     ser.write(command.encode())
     ser.readline()
     return 'OK'
+
 
 #motor2
 @app.route('/motor_rotate2/<id>/<data>', methods=['GET'])
@@ -208,6 +222,7 @@ def motor_rotate2(id, data):
     ser.readline()
     return 'OK'
 
+
 @app.route('/motor_stop2/<id>', methods=['GET'])
 def motor_stop2(id):
     command = "/1005-0/2/0\n"
@@ -215,19 +230,18 @@ def motor_stop2(id):
     ser.readline()
     return 'OK'
 
-'''-----Define wxPython Activity-----'''
 
-server = threading.Thread(target=run_server, name="server")
-server.daemon = True
+'''-----Web APIs-----'''
 
-app2 = wx.App()
+@app.route('/api/postport', methods=['POST'])
+def postport():
+    port = request.form.get('port-selector')
+    print port
+    if 'ser' in globals():
+        ser.close()
+    else:
+        global ser
+        ser = serial.Serial(port, 9600)
+    return redirect("http://127.0.0.1:5000/", code=302)
 
-frame = wx.Frame(None, -1, u'Tucratch', size=(250,50))
-panel  = wx.Panel(frame, -1)
-
-combo = wx.ComboBox(panel, -1, u'choices', choices=serial_ports(), style=wx.CB_READONLY)
-
-combo.Bind(wx.EVT_COMBOBOX, combobox_event)
-
-frame.Show()
-app2.MainLoop()
+app.run()

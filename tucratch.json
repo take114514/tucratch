@@ -20,7 +20,7 @@
         ["w", "CO2をはかる", "co2", 0],
         ["r", "CO2", "co2data"],
         ["w", "おんどをはかる(CO2)", "co2temp", 0],
-        ["r", "おんど(CO2)", "co2tempdata"]
+        ["r", "おんど(CO2)", "co2tempdata"],
         ["w", "モーター1をまわす %n", "motor_rotate1", 0],
         ["w", "モーター1をとめる", "motor_stop1", 0],
         ["w", "モーター2をまわす %n", "motor_rotate2", 0],

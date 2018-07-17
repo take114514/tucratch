@@ -13,4 +13,4 @@ if sys.platform == "win32":
 setup(  name = "tucratch",
         version = "0.3",
         options = {"build_exe": {"includes": includes,"excludes": excludes}},
-        executables = [Executable("tucratch.py", base=base)])
+        executables = [Executable("tucratch.py", base=base, icon="assets/appicon.ico")])
