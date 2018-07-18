@@ -1,6 +1,6 @@
 {
     "extensionName": "tucratch",
-    "extensionPort": 5000,
+    "extensionPort": 8081,
     "blockSpecs": [
         ["w", "つまみをみる", "knob", 0],
         ["w", "つまみボタンをみる", "knobbutton", 0],
@@ -12,6 +12,8 @@
         ["r", "きあつ", "pascaldata"],
         ["w", "しつどをはかる", "humid", 0],
         ["r", "しつど", "humiddata"],
+        ["w", "あかるさをはかる", "light", 0],
+        ["r", "あかるさ", "lightdata"],
         ["w", "LEDのあかをつける いろ %n", "red", 0],
         ["w", "LEDのみどりをつける いろ %n", "green", 0],
         ["w", "LEDのあおをつける いろ %n", "blue", 0],

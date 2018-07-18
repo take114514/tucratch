@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
-
+import sys
 import webbrowser
 import serial
 import serial.tools.list_ports
 import json
-from flask import Flask, render_template, request, redirect
-
+from flask import Flask, render_template, request, redirect, make_response
 
 '''------Functions------'''
 
@@ -21,17 +20,24 @@ def serial_ports():
 
 '''-----Main Activity-----'''
 
-webbrowser.open('http://127.0.0.1:5000/')
+webbrowser.open('http://127.0.0.1:8081/')
 
-app = Flask(__name__)
+if getattr(sys, 'frozen', False):
+    template_folder = os.path.join(sys._MEIPASS, 'templates')
+    app = Flask(__name__, template_folder=template_folder)
+else:
+    app = Flask(__name__)
+
 datas = {
     "knob": "0",
+    "knobbutton": "0",
     "temp": "0",
     "humid": "0",
     "pascal": "0",
     "ph": "0",
     "co2": "0",
-    "co2temp": "0"
+    "co2temp": "0",
+    "light": "0"
 }
 
 '''-----Web UI-----'''
@@ -59,8 +65,13 @@ def res():
                'pascaldata ' + datas["pascal"] + '\n' + \
                'phdata ' + datas["ph"] + '\n' + \
                'co2data ' + datas["co2"] + '\n' + \
-               'co2tempdata ' + datas["co2temp"] + '\n'
-    return responce
+               'co2tempdata ' + datas["co2temp"] + '\n' + \
+               'lightdata ' + datas["light"] + '\n'
+
+    value = str(responce)
+    resp = make_response(value)
+    resp.headers['Content-Type'] = 'text/plain'
+    return resp
 
 
 #LEDs
@@ -75,7 +86,10 @@ def led(port, id, data):
     command = "/1001-0/" + str(led) + "/" + str(data) + "\n"
     ser.write(command.encode())
     ser.readline()
-    return 'OK'
+
+    resp = make_response('OK')
+    resp.headers['Content-Type'] = 'text/plain'
+    return resp
 
 
 @app.route('/leds/<id>/<red>/<green>/<blue>', methods=['GET'])
@@ -89,8 +103,24 @@ def leds(id, red, green, blue):
     command3 = "/1001-0/3/" + str(blue) + "\n"
     ser.write(command3.encode())
     ser.readline()
-    return 'OK'
+    
+    resp = make_response('OK')
+    resp.headers['Content-Type'] = 'text/plain'
+    return resp
 
+#light
+@app.route('/light/<id>', methods=['GET'])
+def light(id):
+    command = "/1003-0/4\n"
+    global datas
+    ser.write(command.encode())
+    line = ser.readline()
+    data = json.loads(line)
+    datas['light'] = str(data.get('data'))
+    
+    resp = make_response('OK')
+    resp.headers['Content-Type'] = 'text/plain'
+    return resp
 
 #knob
 @app.route('/knob/<id>', methods=['GET'])
@@ -101,7 +131,10 @@ def knob(id):
     line = ser.readline()
     data = json.loads(line)
     datas['knob'] = str(data.get('data'))
-    return 'OK'
+    
+    resp = make_response('OK')
+    resp.headers['Content-Type'] = 'text/plain'
+    return resp
 
 
 @app.route('/knobbutton/<id>', methods=['GET'])
@@ -111,7 +144,10 @@ def knobbutton(id):
     line = ser.readline()
     data = json.loads(line)
     datas['knobbutton'] = str(data.get('data'))
-    return 'OK'
+    
+    resp = make_response('OK')
+    resp.headers['Content-Type'] = 'text/plain'
+    return resp
 
 
 #temp
@@ -123,7 +159,10 @@ def temp(id):
     line = ser.readline()
     data = json.loads(line)
     datas['temp'] = str(data.get('data'))
-    return 'OK'
+
+    resp = make_response('OK')
+    resp.headers['Content-Type'] = 'text/plain'
+    return resp
 
 
 #humid
@@ -135,7 +174,10 @@ def humid(id):
     line = ser.readline()
     data = json.loads(line)
     datas['humid'] = str(data.get('data'))
-    return 'OK'
+
+    resp = make_response('OK')
+    resp.headers['Content-Type'] = 'text/plain'
+    return resp
 
 
 #pressure
@@ -147,7 +189,10 @@ def pascal(id):
     line = ser.readline()
     data = json.loads(line)
     datas['pascal'] = str(data.get('data'))
-    return 'OK'
+
+    resp = make_response('OK')
+    resp.headers['Content-Type'] = 'text/plain'
+    return resp
 
 
 #ph
@@ -159,7 +204,10 @@ def ph(id):
     line = ser.readline()
     data = json.loads(line)
     datas['ph'] = str(data.get('data'))
-    return 'OK'
+
+    resp = make_response('OK')
+    resp.headers['Content-Type'] = 'text/plain'
+    return resp
 
 
 #co2
@@ -171,7 +219,10 @@ def co2(id):
     line = ser.readline()
     data = json.loads(line)
     datas['co2'] = str(data.get('data'))
-    return 'OK'
+
+    resp = make_response('OK')
+    resp.headers['Content-Type'] = 'text/plain'
+    return resp
 
 
 #co2-temp
@@ -183,7 +234,10 @@ def co2temp(id):
     line = ser.readline()
     data = json.loads(line)
     datas['co2temp'] = str(data.get('data'))
-    return 'OK'
+
+    resp = make_response('OK')
+    resp.headers['Content-Type'] = 'text/plain'
+    return resp
 
 
 #motor1
@@ -192,7 +246,10 @@ def motor_rotate1(id, data):
     command = "/1005-0/1/" + str(data) + "\n"
     ser.write(command.encode())
     ser.readline()
-    return 'OK'
+
+    resp = make_response('OK')
+    resp.headers['Content-Type'] = 'text/plain'
+    return resp
 
 
 @app.route('/motor_stop1/<id>', methods=['GET'])
@@ -200,7 +257,10 @@ def motor_stop1(id):
     command = "/1005-0/1/0\n"
     ser.write(command.encode())
     ser.readline()
-    return 'OK'
+
+    resp = make_response('OK')
+    resp.headers['Content-Type'] = 'text/plain'
+    return resp
 
 
 #motor2
@@ -209,7 +269,10 @@ def motor_rotate2(id, data):
     command = "/1005-0/2/" + str(data) + "\n"
     ser.write(command.encode())
     ser.readline()
-    return 'OK'
+
+    resp = make_response('OK')
+    resp.headers['Content-Type'] = 'text/plain'
+    return resp
 
 
 @app.route('/motor_stop2/<id>', methods=['GET'])
@@ -217,7 +280,10 @@ def motor_stop2(id):
     command = "/1005-0/2/0\n"
     ser.write(command.encode())
     ser.readline()
-    return 'OK'
+
+    resp = make_response('OK')
+    resp.headers['Content-Type'] = 'text/plain'
+    return resp
 
 
 '''-----Web APIs-----'''
@@ -225,12 +291,12 @@ def motor_stop2(id):
 @app.route('/api/postport', methods=['POST'])
 def postport():
     port = request.form.get('port-selector')
-    print port
     if 'ser' in globals():
         ser.close()
     else:
         global ser
         ser = serial.Serial(port, 9600)
-    return redirect("http://127.0.0.1:5000/", code=302)
+    return redirect("http://127.0.0.1:8081/", code=302)
 
-app.run(threaded=True)
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=8081)
