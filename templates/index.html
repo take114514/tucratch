@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>PortSelector</title>
+    </head>
+    <body>
+        <h1>PortSelect</h1>
+        <form method="post" action="/api/postport">
+            <select name="port-selector">
+                {% for port in ports %}
+                <option value={{port}}>{{port}}</option>
+                {% endfor %}
+            </select>
+            <input type="submit" value="select">
+        </form>
+        <p>{{status}}</p>
+    </body>
+</html>
