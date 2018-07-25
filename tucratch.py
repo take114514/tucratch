@@ -91,7 +91,7 @@ def led(port, id, data):
         led = 2
     elif port == "blue":
         led = 3
-    command = "/1001-0/" + str(led) + "/" + str(data) + "\n"
+    command = "/1001-0/" + str(led) + " " + str(data) + "\n"
     ser.write(command.encode())
     ser.readline()
 
