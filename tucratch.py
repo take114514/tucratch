@@ -177,7 +177,7 @@ def knobbutton(id):
 
 @app.route('/knobreset/<id>', methods=['GET'])
 def knobreset(id):
-    command = "/1007-0/1/0\n"
+    command = "/1007-0/1 0\n"
     ser.write(command.encode())
     line = ser.readline()
     print line
