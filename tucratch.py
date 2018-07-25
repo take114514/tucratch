@@ -111,7 +111,7 @@ def leds(id, red, green, blue):
     command3 = "/1001-0/3/" + str(blue) + "\n"
     ser.write(command3.encode())
     ser.readline()
-    
+
     resp = make_response('OK')
     resp.headers['Content-Type'] = 'text/plain'
     return resp
@@ -126,7 +126,7 @@ def light1(id):
     data = json.loads(line)
     datas['light1'] = str(data.get('data'))
     print line
-    
+
     resp = make_response('OK')
     resp.headers['Content-Type'] = 'text/plain'
     return resp
@@ -141,7 +141,7 @@ def light2(id):
     data = json.loads(line)
     datas['light2'] = str(data.get('data'))
     print line
-    
+
     resp = make_response('OK')
     resp.headers['Content-Type'] = 'text/plain'
     return resp
@@ -156,7 +156,7 @@ def knob(id):
     data = json.loads(line)
     datas['knob'] = str(data.get('data'))
     print line
-    
+
     resp = make_response('OK')
     resp.headers['Content-Type'] = 'text/plain'
     return resp
@@ -170,7 +170,7 @@ def knobbutton(id):
     data = json.loads(line)
     datas['knobbutton'] = str(data.get('data'))
     print line
-    
+
     resp = make_response('OK')
     resp.headers['Content-Type'] = 'text/plain'
     return resp
@@ -181,7 +181,7 @@ def knobreset(id):
     ser.write(command.encode())
     line = ser.readline()
     print line
-    
+
     resp = make_response('OK')
     resp.headers['Content-Type'] = 'text/plain'
     return resp
@@ -336,7 +336,7 @@ def co2temp(id):
 #motor1
 @app.route('/motor_rotate1/<id>/<data>', methods=['GET'])
 def motor_rotate1(id, data):
-    command = "/1005-0/1/" + str(data) + "\n"
+    command = "/1005-0/1 " + str(data) + "\n"
     ser.write(command.encode())
     ser.readline()
 
@@ -347,7 +347,7 @@ def motor_rotate1(id, data):
 
 @app.route('/motor_stop1/<id>', methods=['GET'])
 def motor_stop1(id):
-    command = "/1005-0/1/0\n"
+    command = "/1005-0/1 0\n"
     ser.write(command.encode())
     ser.readline()
 
@@ -359,7 +359,7 @@ def motor_stop1(id):
 #motor2
 @app.route('/motor_rotate2/<id>/<data>', methods=['GET'])
 def motor_rotate2(id, data):
-    command = "/1005-0/2/" + str(data) + "\n"
+    command = "/1005-0/2 " + str(data) + "\n"
     ser.write(command.encode())
     ser.readline()
 
@@ -370,7 +370,7 @@ def motor_rotate2(id, data):
 
 @app.route('/motor_stop2/<id>', methods=['GET'])
 def motor_stop2(id):
-    command = "/1005-0/2/0\n"
+    command = "/1005-0/2 0\n"
     ser.write(command.encode())
     ser.readline()
 
