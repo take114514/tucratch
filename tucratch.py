@@ -41,7 +41,8 @@ datas = {
     "co2": "0",
     "co2temp": "0",
     "light1": "0",
-    "light2": "0"
+    "light2": "0",
+    "distance": "0"
 }
 
 '''-----Web UI-----'''
@@ -74,7 +75,8 @@ def res():
                'co2data ' + datas["co2"] + '\n' + \
                'co2tempdata ' + datas["co2temp"] + '\n' + \
                'lightdata1 ' + datas["light1"] + '\n'+ \
-               'lightdata2 ' + datas["light2"] + '\n'
+               'lightdata2 ' + datas["light2"] + '\n' + \
+               'distancedata ' + datas["distance"] + '\n'
 
     value = str(responce)
     resp = make_response(value)
@@ -102,13 +104,13 @@ def led(port, id, data):
 
 @app.route('/leds/<id>/<red>/<green>/<blue>', methods=['GET'])
 def leds(id, red, green, blue):
-    command1 = "/1001-0/1/ " + str(red) + "\n"
+    command1 = "/1001-0/1 " + str(red) + "\n"
     ser.write(command1.encode())
     ser.readline()
-    command2 = "/1001-0/2/ " + str(green) + "\n"
+    command2 = "/1001-0/2 " + str(green) + "\n"
     ser.write(command2.encode())
     ser.readline()
-    command3 = "/1001-0/3/" + str(blue) + "\n"
+    command3 = "/1001-0/3 " + str(blue) + "\n"
     ser.write(command3.encode())
     ser.readline()
 
@@ -373,6 +375,21 @@ def motor_stop2(id):
     command = "/1005-0/2 0\n"
     ser.write(command.encode())
     ser.readline()
+
+    resp = make_response('OK')
+    resp.headers['Content-Type'] = 'text/plain'
+    return resp
+
+# distance sensor
+@app.route('/distance/<id>', methods=['GET'])
+def distance(id):
+    command = "/100a-0/1\n"
+    global datas
+    ser.write(command.encode())
+    line = ser.readline()
+    data = json.loads(line)
+    datas['distance'] = str(data.get('data'))
+    print line
 
     resp = make_response('OK')
     resp.headers['Content-Type'] = 'text/plain'

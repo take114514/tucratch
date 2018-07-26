@@ -36,6 +36,8 @@
         ["w", "モーター1をまわす %n", "motor_rotate1", 0],
         ["w", "モーター1をとめる", "motor_stop1", 0],
         ["w", "モーター2をまわす %n", "motor_rotate2", 0],
-        ["w", "モーター2をとめる", "motor_stop2", 0]
+        ["w", "モーター2をとめる", "motor_stop2", 0],
+        ["w", "きょりをはかる", "distance", 0],
+        ["r", "きょり", "distancedata"],
     ]
 }
