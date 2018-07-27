@@ -31,17 +31,10 @@ else:
 datas = {
     "knob": "0",
     "knobbutton": "0",
-    "temp1": "0",
-    "humid1": "0",
-    "pascal1": "0",
-    "temp2": "0",
-    "humid2": "0",
-    "pascal2": "0",
-    "ph": "0",
-    "co2": "0",
-    "co2temp": "0",
-    "light1": "0",
-    "light2": "0",
+    "temp": "0",
+    "humid": "0",
+    "pascal": "0",
+    "light": "0",
     "distance": "0"
 }
 
@@ -65,17 +58,13 @@ def res():
     global datas
     responce = 'knobdata ' + datas["knob"] + '\n' + \
                'knobbuttondata ' + datas["knobbutton"] + '\n' + \
-               'tempdata1 ' + datas["temp1"] + '\n' + \
-               'humiddata1 ' + datas["humid1"] + '\n' + \
-               'pascaldata1 ' + datas["pascal1"] + '\n' + \
-               'tempdata2 ' + datas["temp2"] + '\n' + \
-               'humiddata2 ' + datas["humid2"] + '\n' + \
-               'pascaldata2 ' + datas["pascal2"] + '\n' + \
+               'tempdata ' + datas["temp"] + '\n' + \
+               'humiddata ' + datas["humid"] + '\n' + \
+               'pascaldata ' + datas["pascal"] + '\n' + \
                'phdata ' + datas["ph"] + '\n' + \
                'co2data ' + datas["co2"] + '\n' + \
                'co2tempdata ' + datas["co2temp"] + '\n' + \
-               'lightdata1 ' + datas["light1"] + '\n'+ \
-               'lightdata2 ' + datas["light2"] + '\n' + \
+               'lightdata ' + datas["light"] + '\n'+ \
                'distancedata ' + datas["distance"] + '\n'
 
     value = str(responce)
@@ -113,36 +102,6 @@ def leds(id, red, green, blue):
     command3 = "/1001-0/3 " + str(blue) + "\n"
     ser.write(command3.encode())
     ser.readline()
-
-    resp = make_response('OK')
-    resp.headers['Content-Type'] = 'text/plain'
-    return resp
-
-#light1
-@app.route('/light1/<id>', methods=['GET'])
-def light1(id):
-    command = "/1003-0/4\n"
-    global datas
-    ser.write(command.encode())
-    line = ser.readline()
-    data = json.loads(line)
-    datas['light1'] = str(data.get('data'))
-    print line
-
-    resp = make_response('OK')
-    resp.headers['Content-Type'] = 'text/plain'
-    return resp
-
-#light2
-@app.route('/light2/<id>', methods=['GET'])
-def light2(id):
-    command = "/1003-1/4\n"
-    global datas
-    ser.write(command.encode())
-    line = ser.readline()
-    data = json.loads(line)
-    datas['light2'] = str(data.get('data'))
-    print line
 
     resp = make_response('OK')
     resp.headers['Content-Type'] = 'text/plain'
@@ -188,17 +147,15 @@ def knobreset(id):
     resp.headers['Content-Type'] = 'text/plain'
     return resp
 
-
-
-#temp1
-@app.route('/temp1/<id>', methods=['GET'])
-def temp1(id):
+#temp
+@app.route('/temp/<id>', methods=['GET'])
+def temp(id):
     command = "/1003-0/1\n"
     global datas
     ser.write(command.encode())
     line = ser.readline()
     data = json.loads(line)
-    datas['temp1'] = str(data.get('data'))
+    datas['temp'] = str(data.get('data'))
     print line
 
     resp = make_response('OK')
@@ -206,15 +163,15 @@ def temp1(id):
     return resp
 
 
-#humid1
-@app.route('/humid1/<id>', methods=['GET'])
-def humid1(id):
+#humid
+@app.route('/humid/<id>', methods=['GET'])
+def humid(id):
     command = "/1003-0/2\n"
     global datas
     ser.write(command.encode())
     line = ser.readline()
     data = json.loads(line)
-    datas['humid1'] = str(data.get('data'))
+    datas['humid'] = str(data.get('data'))
     print line
 
     resp = make_response('OK')
@@ -222,122 +179,39 @@ def humid1(id):
     return resp
 
 
-#pressure1
-@app.route('/pascal1/<id>', methods=['GET'])
-def pascal1(id):
+#pressure
+@app.route('/pascal/<id>', methods=['GET'])
+def pascal(id):
     command = "/1003-0/3\n"
     global datas
     ser.write(command.encode())
     line = ser.readline()
     data = json.loads(line)
-    datas['pascal1'] = str(data.get('data'))
+    datas['pascal'] = str(data.get('data'))
     print line
 
     resp = make_response('OK')
     resp.headers['Content-Type'] = 'text/plain'
     return resp
 
-
-#temp2
-@app.route('/temp2/<id>', methods=['GET'])
-def temp2(id):
-    command = "/1003-1/1\n"
+#light
+@app.route('/light/<id>', methods=['GET'])
+def light(id):
+    command = "/1003-0/4\n"
     global datas
     ser.write(command.encode())
     line = ser.readline()
     data = json.loads(line)
-    datas['temp2'] = str(data.get('data'))
+    datas['light'] = str(data.get('data'))
     print line
 
     resp = make_response('OK')
     resp.headers['Content-Type'] = 'text/plain'
     return resp
 
-
-#humid2
-@app.route('/humid2/<id>', methods=['GET'])
-def humid2(id):
-    command = "/1003-1/2\n"
-    global datas
-    ser.write(command.encode())
-    line = ser.readline()
-    data = json.loads(line)
-    datas['humid2'] = str(data.get('data'))
-    print line
-
-    resp = make_response('OK')
-    resp.headers['Content-Type'] = 'text/plain'
-    return resp
-
-
-#pressure2
-@app.route('/pascal2/<id>', methods=['GET'])
-def pascal2(id):
-    command = "/1003-1/3\n"
-    global datas
-    ser.write(command.encode())
-    line = ser.readline()
-    data = json.loads(line)
-    datas['pascal2'] = str(data.get('data'))
-    print line
-
-    resp = make_response('OK')
-    resp.headers['Content-Type'] = 'text/plain'
-    return resp
-
-
-
-#ph
-@app.route('/ph/<id>', methods=['GET'])
-def ph(id):
-    command = "/1008-0/1\n"
-    global datas
-    ser.write(command.encode())
-    line = ser.readline()
-    data = json.loads(line)
-    datas['ph'] = str(data.get('data'))
-    print line
-
-    resp = make_response('OK')
-    resp.headers['Content-Type'] = 'text/plain'
-    return resp
-
-
-#co2
-@app.route('/co2/<id>', methods=['GET'])
-def co2(id):
-    command = "/1009-0/1\n"
-    global datas
-    ser.write(command.encode())
-    line = ser.readline()
-    data = json.loads(line)
-    datas['co2'] = str(data.get('data'))
-    print line
-
-    resp = make_response('OK')
-    resp.headers['Content-Type'] = 'text/plain'
-    return resp
-
-
-#co2-temp
-@app.route('/co2temp/<id>', methods=['GET'])
-def co2temp(id):
-    command = "/1009-0/2\n"
-    global datas
-    ser.write(command.encode())
-    line = ser.readline()
-    data = json.loads(line)
-    datas['co2temp'] = str(data.get('data'))
-    print line
-
-    resp = make_response('OK')
-    resp.headers['Content-Type'] = 'text/plain'
-    return resp
-
-
-#motor1
-@app.route('/motor_rotate1/<id>/<data>', methods=['GET'])
-def motor_rotate1(id, data):
+#motor
+@app.route('/motor_rotate/<id>/<data>', methods=['GET'])
+def motor_rotate(id, data):
     command = "/1005-0/1 " + str(data) + "\n"
     ser.write(command.encode())
     ser.readline()
@@ -347,8 +221,8 @@ def motor_rotate1(id, data):
     return resp
 
 
-@app.route('/motor_stop1/<id>', methods=['GET'])
-def motor_stop1(id):
+@app.route('/motor_stop/<id>', methods=['GET'])
+def motor_stop(id):
     command = "/1005-0/1 0\n"
     ser.write(command.encode())
     ser.readline()
@@ -357,24 +231,16 @@ def motor_stop1(id):
     resp.headers['Content-Type'] = 'text/plain'
     return resp
 
-
-#motor2
-@app.route('/motor_rotate2/<id>/<data>', methods=['GET'])
-def motor_rotate2(id, data):
-    command = "/1005-0/2 " + str(data) + "\n"
+# distance sensor
+@app.route('/distance/<id>', methods=['GET'])
+def distance(id):
+    command = "/100a-0/1\n"
+    global datas
     ser.write(command.encode())
-    ser.readline()
-
-    resp = make_response('OK')
-    resp.headers['Content-Type'] = 'text/plain'
-    return resp
-
-
-@app.route('/motor_stop2/<id>', methods=['GET'])
-def motor_stop2(id):
-    command = "/1005-0/2 0\n"
-    ser.write(command.encode())
-    ser.readline()
+    line = ser.readline()
+    data = json.loads(line)
+    datas['distance'] = str(data.get('data'))
+    print line
 
     resp = make_response('OK')
     resp.headers['Content-Type'] = 'text/plain'
