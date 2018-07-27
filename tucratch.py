@@ -61,9 +61,6 @@ def res():
                'tempdata ' + datas["temp"] + '\n' + \
                'humiddata ' + datas["humid"] + '\n' + \
                'pascaldata ' + datas["pascal"] + '\n' + \
-               'phdata ' + datas["ph"] + '\n' + \
-               'co2data ' + datas["co2"] + '\n' + \
-               'co2tempdata ' + datas["co2temp"] + '\n' + \
                'lightdata ' + datas["light"] + '\n'+ \
                'distancedata ' + datas["distance"] + '\n'
 
@@ -226,21 +223,6 @@ def motor_stop(id):
     command = "/1005-0/1 0\n"
     ser.write(command.encode())
     ser.readline()
-
-    resp = make_response('OK')
-    resp.headers['Content-Type'] = 'text/plain'
-    return resp
-
-# distance sensor
-@app.route('/distance/<id>', methods=['GET'])
-def distance(id):
-    command = "/100a-0/1\n"
-    global datas
-    ser.write(command.encode())
-    line = ser.readline()
-    data = json.loads(line)
-    datas['distance'] = str(data.get('data'))
-    print line
 
     resp = make_response('OK')
     resp.headers['Content-Type'] = 'text/plain'
