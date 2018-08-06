@@ -6,6 +6,52 @@ import serial
 import serial.tools.list_ports
 import json
 from flask import Flask, render_template, request, redirect, make_response
+from time import sleep
+import re
+
+'''------Global values------'''
+
+serial_cache = ""
+
+datas = {
+    "knob_value": "0",
+    "knob_button": "0",
+    "environment_temp": "0",
+    "environment_humid": "0",
+    "environment_pascal": "0",
+    "environment_light": "0",
+    "environment_1_temp": "0",
+    "environment_1_humid": "0",
+    "environment_1_pascal": "0",
+    "environment_1_light": "0",
+    "environment_2_temp": "0",
+    "environment_2_humid": "0",
+    "environment_2_pascal": "0",
+    "environment_2_light": "0",
+    "co2sensor_value": "0",
+    "phsensor_value": "0",
+    "distance": "0"
+}
+
+serialnums = {
+    "led": "1001",
+    "knob": "1007",
+    "environment": "1003",
+    "distance": "100a",
+    "motor": "1005",
+    "phsensor": "1008",
+    "co2sensor": "1009"
+}
+
+ids = {
+    "led": [],
+    "knob": [],
+    "environment": [],
+    "distance": [],
+    "motor": [],
+    "phsensor": [],
+    "co2sensor": []
+}
 
 '''------Functions------'''
 
@@ -16,6 +62,103 @@ def serial_ports():
     for port in ports:
         port_list.append(port.device)
     return port_list
+
+def serial_conversation(transmit_data):
+    global serial_cache
+    ser.write(transmit_data)
+
+    while ser.out_waiting > 0:
+        sleep(0.001)
+
+    wait_count = 0
+
+    while True:
+        if ser.in_waiting > 0:
+            wait_count = 0
+            c = ser.read(1);
+            if len(c) == 0:
+                break
+            elif c[0] == b'\x0a':
+                try:
+                    response = json.loads(serial_cache)
+                    serial_cache = ""
+                except:
+                    print "### JSON parse error! ###"
+                    print serial_cache
+                    serial_cache = ""
+                    continue
+                respons_parse(response)
+            elif c[0] < b'~' and c[0] > b'!':
+                serial_cache += c[0]
+        elif ser.in_waiting == 0:
+            sleep(0.001)
+            wait_count += 1
+            if wait_count > 10:
+                break
+
+def respons_parse(input):
+    global datas
+    global ids
+    global serialnums
+
+    print input
+
+    if 'bridge' in input:
+        devices = input['bridge']
+        ids = {
+            "led": [],
+            "knob": [],
+            "environment": [],
+            "distance": [],
+            "motor": [],
+            "phsensor": [],
+            "co2sensor": []
+        }
+        for device in devices:
+            if re.compile(serialnums["led"]).match(device):
+                ids['led'].append(device);
+            if re.compile(serialnums["environment"]).match(device):
+                ids['environment'].append(device)
+            if re.compile(serialnums["motor"]).match(device):
+                ids['motor'].append(device)
+            if re.compile(serialnums["knob"]).match(device):
+                ids['knob'].append(device)
+            if re.compile(serialnums["distance"]).match(device):
+                ids['distance'].append(device)
+            if re.compile(serialnums["co2sensor"]).match(device):
+                ids['co2sensor'].append(device)
+            if re.compile(serialnums["phsensor"]).match(device):
+                ids['phsensor'].append(device)
+        print ids
+    elif input['status'] == 200:
+        id = input['id']
+        port = input['port']
+        if re.compile(ids["distance"][0]).match(id) and port == 1:
+            datas['distance'] = str(input.get('data'))
+        elif re.compile(ids["knob"][0]).match(id) and port == 1:
+            datas['knob_value'] = str(input.get('data'))
+        elif re.compile(ids["knob"][0]).match(id) and port == 2:
+            datas['knob_button'] = str(input.get('data'))
+        elif re.compile(ids["environment"][0]).match(id) and port == 1:
+            datas['environment_temp'] = str(input.get('data'))
+        elif re.compile(ids["environment"][0]).match(id) and port == 2:
+            datas['environment_humid'] = str(input.get('data'))
+        elif re.compile(ids["environment"][0]).match(id) and port == 3:
+            datas['environment_pascal'] = str(input.get('data'))
+        elif re.compile(ids["environment"][0]).match(id) and port == 4:
+            datas['environment_light'] = str(input.get('data'))
+        elif re.compile(ids["environment"][1]).match(id) and port == 1:
+            datas['environment_2_temp'] = str(input.get('data'))
+        elif re.compile(ids["environment"][1]).match(id) and port == 2:
+            datas['environment_2_humid'] = str(input.get('data'))
+        elif re.compile(ids["environment"][1]).match(id) and port == 3:
+            datas['environment_2_pascal'] = str(input.get('data'))
+        elif re.compile(ids["environment"][1]).match(id) and port == 4:
+            datas['environment_2_light'] = str(input.get('data'))
+        elif re.compile(ids["co2sensor"][0]).match(id) and port == 1:
+            datas['co2sensor_value'] = str(input.get('data'))
+        elif re.compile(ids["phsensor"][0]).match(id) and port == 1:
+            datas['phsensor_value'] = str(input.get('data'))
 
 
 '''-----Main Activity-----'''
@@ -28,15 +171,6 @@ if getattr(sys, 'frozen', False):
 else:
     app = Flask(__name__)
 
-datas = {
-    "knob": "0",
-    "knobbutton": "0",
-    "temp": "0",
-    "humid": "0",
-    "pascal": "0",
-    "light": "0",
-    "distance": "0"
-}
 
 '''-----Web UI-----'''
 
@@ -56,13 +190,19 @@ def index():
 @app.route('/poll', methods=['GET'])
 def res():
     global datas
-    responce = 'knobdata ' + datas["knob"] + '\n' + \
-               'knobbuttondata ' + datas["knobbutton"] + '\n' + \
-               'tempdata ' + datas["temp"] + '\n' + \
-               'humiddata ' + datas["humid"] + '\n' + \
-               'pascaldata ' + datas["pascal"] + '\n' + \
-               'lightdata ' + datas["light"] + '\n'+ \
-               'distancedata ' + datas["distance"] + '\n'
+    responce = 'knob_value_data ' + datas["knob_value"] + '\n' + \
+               'knob_button_data ' + datas["knob_button"] + '\n' + \
+               'environment_temp_data ' + datas["environment_temp"] + '\n' + \
+               'environment_humid_data ' + datas["environment_humid"] + '\n' + \
+               'environment_pascal_data ' + datas["environment_pascal"] + '\n' + \
+               'environment_light_data ' + datas["environment_light"] + '\n'+ \
+               'environment_2_temp_data ' + datas["environment_2_temp"] + '\n' + \
+               'environment_2_humid_data ' + datas["environment_2_humid"] + '\n' + \
+               'environment_2_pascal_data ' + datas["environment_2_pascal"] + '\n' + \
+               'environment_2_light_data ' + datas["environment_2_light"] + '\n'+ \
+               'distance_data ' + datas["distance"] + '\n' + \
+               'co2phsensor_value_data ' + datas["co2sensor_value"] + '\n' + \
+               'phsensor_value_data ' + datas["phsensor_value"] + '\n'
 
     value = str(responce)
     resp = make_response(value)
@@ -70,175 +210,237 @@ def res():
     return resp
 
 
+#Reset & init
+@app.route('/reset_all', methods=['GET'])
+def reset_all():
+    command = "/\n"
+    serial_conversation(command.encode())
+    resp = make_response('OK')
+    resp.headers['Content-Type'] = 'text/plain'
+    return resp
+
+
 #LEDs
-@app.route('/<port>/<id>/<data>', methods=['GET'])
-def led(port, id, data):
-    if port == "red":
-        led = 1
-    elif port == "green":
-        led = 2
-    elif port == "blue":
-        led = 3
-    command = "/1001-0/" + str(led) + " " + str(data) + "\n"
-    ser.write(command.encode())
-    ser.readline()
-
+@app.route('/led_red/<id>/<data>', methods=['GET'])
+def led_red(id, data):
+    global ids
+    command = ids['led'][0] + "/1" + " " + str(data) + "\n"
+    serial_conversation(command.encode())
     resp = make_response('OK')
     resp.headers['Content-Type'] = 'text/plain'
     return resp
 
-
-@app.route('/leds/<id>/<red>/<green>/<blue>', methods=['GET'])
-def leds(id, red, green, blue):
-    command1 = "/1001-0/1 " + str(red) + "\n"
-    ser.write(command1.encode())
-    ser.readline()
-    command2 = "/1001-0/2 " + str(green) + "\n"
-    ser.write(command2.encode())
-    ser.readline()
-    command3 = "/1001-0/3 " + str(blue) + "\n"
-    ser.write(command3.encode())
-    ser.readline()
-
+@app.route('/led_green/<id>/<data>', methods=['GET'])
+def led_green(id, data):
+    global ids
+    command = ids['led'][0] + "/2" + " " + str(data) + "\n"
+    serial_conversation(command.encode())
     resp = make_response('OK')
     resp.headers['Content-Type'] = 'text/plain'
     return resp
+
+@app.route('/led_blue/<id>/<data>', methods=['GET'])
+def led_blue(id, data):
+    global ids
+    command = ids['led'][0] + "/3" + " " + str(data) + "\n"
+    serial_conversation(command.encode())
+    resp = make_response('OK')
+    resp.headers['Content-Type'] = 'text/plain'
+    return resp
+
+@app.route('/led_all/<id>/<red>/<green>/<blue>', methods=['GET'])
+def led_all(id, red, green, blue):
+    global ids
+    command = ids["led"][0] + "/1 " + str(red) + "\n" + \
+              ids["led"][0] + "/2 " + str(green) + "\n" + \
+              ids["led"][0] + "/3 " + str(blue) + "\n"
+    serial_conversation(command.encode())
+    resp = make_response('OK')
+    resp.headers['Content-Type'] = 'text/plain'
+    return resp
+
 
 #knob
-@app.route('/knob/<id>', methods=['GET'])
-def knob(id):
-    command = "/1007-0/1\n"
-    global datas
-    ser.write(command.encode())
-    line = ser.readline()
-    data = json.loads(line)
-    datas['knob'] = str(data.get('data'))
-    print line
+@app.route('/knob_value/<id>', methods=['GET'])
+def knob_value(id):
+    global ids
+    command = ids["knob"][0] + "/1\n"
+    serial_conversation(command.encode())
+    resp = make_response('OK')
+    resp.headers['Content-Type'] = 'text/plain'
+    return resp
 
+@app.route('/knob_button/<id>', methods=['GET'])
+def knob_button(id):
+    global ids
+    command = ids["knob"][0] + "/2\n"
+    serial_conversation(command.encode())
+    resp = make_response('OK')
+    resp.headers['Content-Type'] = 'text/plain'
+    return resp
+
+@app.route('/knob_reset/<id>', methods=['GET'])
+def knob_reset(id):
+    global ids
+    command = ids["knob"][0] + "/1 0\n"
+    serial_conversation(command.encode())
     resp = make_response('OK')
     resp.headers['Content-Type'] = 'text/plain'
     return resp
 
 
-@app.route('/knobbutton/<id>', methods=['GET'])
-def knobbutton(id):
-    command = "/1007-0/2\n"
-    ser.write(command.encode())
-    line = ser.readline()
-    data = json.loads(line)
-    datas['knobbutton'] = str(data.get('data'))
-    print line
-
-    resp = make_response('OK')
-    resp.headers['Content-Type'] = 'text/plain'
-    return resp
-
-@app.route('/knobreset/<id>', methods=['GET'])
-def knobreset(id):
-    command = "/1007-0/1 0\n"
-    ser.write(command.encode())
-    line = ser.readline()
-    print line
-
-    resp = make_response('OK')
-    resp.headers['Content-Type'] = 'text/plain'
-    return resp
-
+#environment
 #temp
-@app.route('/temp/<id>', methods=['GET'])
-def temp(id):
-    command = "/1003-0/1\n"
-    global datas
-    ser.write(command.encode())
-    line = ser.readline()
-    data = json.loads(line)
-    datas['temp'] = str(data.get('data'))
-    print line
-
+@app.route('/environment_temp/<id>', methods=['GET'])
+def environment_temp(id):
+    global ids
+    command = ids["environment"][0] + "/1\n"
+    serial_conversation(command.encode())
     resp = make_response('OK')
     resp.headers['Content-Type'] = 'text/plain'
     return resp
-
 
 #humid
-@app.route('/humid/<id>', methods=['GET'])
-def humid(id):
-    command = "/1003-0/2\n"
-    global datas
-    ser.write(command.encode())
-    line = ser.readline()
-    data = json.loads(line)
-    datas['humid'] = str(data.get('data'))
-    print line
-
+@app.route('/environment_humid/<id>', methods=['GET'])
+def environment_humid(id):
+    global ids
+    command = ids["environment"][0] + "/2\n"
+    serial_conversation(command.encode())
     resp = make_response('OK')
     resp.headers['Content-Type'] = 'text/plain'
     return resp
 
-
 #pressure
-@app.route('/pascal/<id>', methods=['GET'])
-def pascal(id):
-    command = "/1003-0/3\n"
-    global datas
-    ser.write(command.encode())
-    line = ser.readline()
-    data = json.loads(line)
-    datas['pascal'] = str(data.get('data'))
-    print line
-
+@app.route('/environment_pascal/<id>', methods=['GET'])
+def environment_pascal(id):
+    global ids
+    command = ids["environment"][0] + "/3\n"
+    serial_conversation(command.encode())
     resp = make_response('OK')
     resp.headers['Content-Type'] = 'text/plain'
     return resp
 
 #light
-@app.route('/light/<id>', methods=['GET'])
-def light(id):
-    command = "/1003-0/4\n"
-    global datas
-    ser.write(command.encode())
-    line = ser.readline()
-    data = json.loads(line)
-    datas['light'] = str(data.get('data'))
-    print line
-
-    resp = make_response('OK')
-    resp.headers['Content-Type'] = 'text/plain'
-    return resp
-
-#motor
-@app.route('/motor_rotate/<id>/<data>', methods=['GET'])
-def motor_rotate(id, data):
-    command = "/1005-0/1 " + str(data) + "\n"
-    ser.write(command.encode())
-    ser.readline()
-
+@app.route('/environment_light/<id>', methods=['GET'])
+def environment_light(id):
+    global ids
+    command = ids["environment"][0] + "/4\n"
+    serial_conversation(command.encode())
     resp = make_response('OK')
     resp.headers['Content-Type'] = 'text/plain'
     return resp
 
 
-@app.route('/motor_stop/<id>', methods=['GET'])
-def motor_stop(id):
-    command = "/1005-0/1 0\n"
-    ser.write(command.encode())
-    ser.readline()
-
+#environment (multiple)
+#temp
+@app.route('/environment_temp/<id>/<num>', methods=['GET'])
+def environment_multiple_temp(id, num):
+    global ids
+    command = ids["environment"][int(num) - 1] + "/1\n"
+    serial_conversation(command.encode())
     resp = make_response('OK')
     resp.headers['Content-Type'] = 'text/plain'
     return resp
+
+#humid
+@app.route('/environment_humid/<id>/<num>', methods=['GET'])
+def environment_multiple_humid(id, num):
+    global ids
+    command = ids["environment"][int(num) - 1] + "/2\n"
+    serial_conversation(command.encode())
+    resp = make_response('OK')
+    resp.headers['Content-Type'] = 'text/plain'
+    return resp
+
+#pressure
+@app.route('/environment_pascal/<id>/<num>', methods=['GET'])
+def environment_multiple_pascal(id, num):
+    global ids
+    command = ids["environment"][int(num) - 1] + "/3\n"
+    serial_conversation(command.encode())
+    resp = make_response('OK')
+    resp.headers['Content-Type'] = 'text/plain'
+    return resp
+
+#light
+@app.route('/environment_light/<id>/<num>', methods=['GET'])
+def environment_multiple_light(id, num):
+    global ids
+    command = ids["environment"][int(num) - 1] + "/4\n"
+    serial_conversation(command.encode())
+    resp = make_response('OK')
+    resp.headers['Content-Type'] = 'text/plain'
+    return resp
+
 
 # distance sensor
 @app.route('/distance/<id>', methods=['GET'])
 def distance(id):
-    command = "/100a-0/1\n"
-    global datas
-    ser.write(command.encode())
-    line = ser.readline()
-    data = json.loads(line)
-    datas['distance'] = str(data.get('data'))
-    print line
+    global ids
+    command = ids["distance"][0] + "/1\n"
+    serial_conversation(command.encode())
+    resp = make_response('OK')
+    resp.headers['Content-Type'] = 'text/plain'
+    return resp
 
+
+#motor
+@app.route('/motor_rotate/<id>/<data>', methods=['GET'])
+def motor_rotate(id, data):
+    global ids
+    command = ids["motor"][0] + "/1 " + str(data) + "\n"
+    serial_conversation(command.encode())
+    resp = make_response('OK')
+    resp.headers['Content-Type'] = 'text/plain'
+    return resp
+
+@app.route('/motor_stop/<id>', methods=['GET'])
+def motor_stop(id):
+    global ids
+    command = ids["motor"][0] + "/1 0\n"
+    serial_conversation(command.encode())
+    resp = make_response('OK')
+    resp.headers['Content-Type'] = 'text/plain'
+    return resp
+
+
+#motor (multiple)
+@app.route('/motor_rotate/<id>/<num>/<value>', methods=['GET'])
+def motor_multiple_rotate(id, num, data):
+    global ids
+    command = ids["motor"][int(num) - 1] + "/1 " + str(data) + "\n"
+    serial_conversation(command.encode())
+    resp = make_response('OK')
+    resp.headers['Content-Type'] = 'text/plain'
+    return resp
+
+@app.route('/motor_stop/<id>/<num>', methods=['GET'])
+def motor_multiple_stop(id, num):
+    global ids
+    command = ids["motor"][int(num) - 1] + "/1 0\n"
+    serial_conversation(command.encode())
+    resp = make_response('OK')
+    resp.headers['Content-Type'] = 'text/plain'
+    return resp
+
+
+# pH sensor
+@app.route('/phsensor_value/<id>', methods=['GET'])
+def phsensor_value(id):
+    global ids
+    command = ids["phsensor"][0] + "/1\n"
+    serial_conversation(command.encode())
+    resp = make_response('OK')
+    resp.headers['Content-Type'] = 'text/plain'
+    return resp
+
+
+# CO2 sensor
+@app.route('/co2sensor_value/<id>', methods=['GET'])
+def co2sensor_value(id):
+    global ids
+    command = ids["co2sensor"][0] + "/1\n"
+    serial_conversation(command.encode())
     resp = make_response('OK')
     resp.headers['Content-Type'] = 'text/plain'
     return resp
@@ -253,7 +455,7 @@ def postport():
         ser.close()
     else:
         global ser
-        ser = serial.Serial(port, 9600)
+        ser = serial.Serial(port, 115200,  timeout=0)
     return redirect("http://127.0.0.1:8081/", code=302)
 
 if __name__ == "__main__":
