@@ -2,10 +2,14 @@
     "extensionName": "tucratch",
     "extensionPort": 8081,
     "blockSpecs": [
+        ["w", "LEDのあかをつける いろ %n", "led_red", 0],
+        ["w", "LEDのみどりをつける いろ %n", "led_green", 0],
+        ["w", "LEDのあおをつける いろ %n", "led_blue", 0],
+        ["w", "LEDをつける いろ %n%n%n", "led_all", 0, 0, 0],
         ["w", "つまみをみる", "knob_value", 0],
-        ["w", "つまみボタンをみる", "knob_button", 0],
-        ["w", "つまみリセット", "knob_reset", 0],
+        ["w", "つまみをリセットする", "knob_reset", 0],
         ["r", "つまみのかいてんすう", "knob_value_data"],
+        ["w", "つまみのボタンをみる", "knob_button", 0],
         ["r", "つまみボタンおした？", "knob_button_data"],
         ["w", "おんどをはかる", "environment_temp", 0],
         ["r", "おんど", "environment_temp_data"],
@@ -17,10 +21,6 @@
         ["r", "あかるさ", "environment_light_data"],
         ["w", "きょりをはかる", "distance", 0],
         ["r", "きょり", "distance_data"],
-        ["w", "LEDのあかをつける いろ %n", "led_red", 0],
-        ["w", "LEDのみどりをつける いろ %n", "led_green", 0],
-        ["w", "LEDのあおをつける いろ %n", "led_blue", 0],
-        ["w", "LEDをつける いろ %n%n%n", "led_all", 0, 0, 0],
         ["w", "モーターをまわす %n", "motor_rotate", 0],
         ["w", "モーターをとめる", "motor_stop", 0]
     ]

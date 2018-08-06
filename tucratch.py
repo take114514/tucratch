@@ -20,10 +20,6 @@ datas = {
     "environment_humid": "0",
     "environment_pascal": "0",
     "environment_light": "0",
-    "environment_1_temp": "0",
-    "environment_1_humid": "0",
-    "environment_1_pascal": "0",
-    "environment_1_light": "0",
     "environment_2_temp": "0",
     "environment_2_humid": "0",
     "environment_2_pascal": "0",
@@ -455,7 +451,7 @@ def postport():
         ser.close()
     else:
         global ser
-        ser = serial.Serial(port, 115200,  timeout=0)
+        ser = serial.Serial(port, 9600,  timeout=0)
     return redirect("http://127.0.0.1:8081/", code=302)
 
 if __name__ == "__main__":
