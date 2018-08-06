@@ -12,6 +12,7 @@ import re
 '''------Global values------'''
 
 serial_cache = ""
+serial_lock = 0
 
 datas = {
     "knob_value": "0",
@@ -61,35 +62,53 @@ def serial_ports():
 
 def serial_conversation(transmit_data):
     global serial_cache
+    global serial_lock
+    i = 0
+    while serial_lock > 0:
+        sleep(0.001)
+        i += 1
+        if i > 1000:
+            print "#### Serial is busy. ####"
+            return
+    serial_lock = 1
+    print "## Serial conversation start. ##"
+    print ">>> " + transmit_data
     ser.write(transmit_data)
 
     while ser.out_waiting > 0:
         sleep(0.001)
 
     wait_count = 0
+    chatch_lines = 0
 
     while True:
         if ser.in_waiting > 0:
             wait_count = 0
-            c = ser.read(1);
-            if len(c) == 0:
-                break
-            elif c[0] == b'\x0a':
-                try:
-                    response = json.loads(serial_cache)
-                    serial_cache = ""
-                except:
-                    print "### JSON parse error! ###"
-                    print serial_cache
-                    serial_cache = ""
-                    continue
-                respons_parse(response)
-            elif c[0] < b'~' and c[0] > b'!':
-                serial_cache += c[0]
+            bStr = ser.read(128);
+            for c in bStr:
+                if c == b'\x0a':
+                    print "<<< " + serial_cache
+                    try:
+                        response = json.loads(serial_cache)
+                        chatch_lines += 1
+                        serial_cache = ""
+                    except:
+                        print "#### JSON parse error! ####"
+                        serial_cache = ""
+                        continue
+                    respons_parse(response)
+                elif c < b'~' and c > b'!':
+                    serial_cache += c[0]
         elif ser.in_waiting == 0:
             sleep(0.001)
             wait_count += 1
-            if wait_count > 10:
+            if wait_count > 10 and chatch_lines > 0:
+                print "## Serial conversation end. ##"
+                serial_lock = 0
+                break
+            if wait_count > 500:
+                print "## Serial conversation time out. ##"
+                serial_lock = 0
                 break
 
 def respons_parse(input):
@@ -215,6 +234,10 @@ def res():
 # Reset & init
 @app.route('/reset_all', methods=['GET'])
 def reset_all():
+    global serial_cache
+    serial_cache = ""
+    ser.reset_input_buffer()
+    ser.reset_output_buffer()
     command = "/\n"
     serial_conversation(command.encode())
     resp = make_response('OK')
