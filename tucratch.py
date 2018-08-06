@@ -284,6 +284,47 @@ def knob_reset(id):
     resp.headers['Content-Type'] = 'text/plain'
     return resp
 
+## Knob LED (red)
+@app.route('/knob_led_red/<id>/<data>', methods=['GET'])
+def knob_led_red(id, data):
+    global ids
+    command = ids['knob'][0] + "/4" + " " + str(data) + "\n"
+    serial_conversation(command.encode())
+    resp = make_response('OK')
+    resp.headers['Content-Type'] = 'text/plain'
+    return resp
+
+## Knob LED (green)
+@app.route('/knob_led_green/<id>/<data>', methods=['GET'])
+def knob_led_green(id, data):
+    global ids
+    command = ids['knob'][0] + "/5" + " " + str(data) + "\n"
+    serial_conversation(command.encode())
+    resp = make_response('OK')
+    resp.headers['Content-Type'] = 'text/plain'
+    return resp
+
+## Knob LED (blue)
+@app.route('/knob_led_blue/<id>/<data>', methods=['GET'])
+def knob_led_blue(id, data):
+    global ids
+    command = ids['knob'][0] + "/6" + " " + str(data) + "\n"
+    serial_conversation(command.encode())
+    resp = make_response('OK')
+    resp.headers['Content-Type'] = 'text/plain'
+    return resp
+
+## Knob LEDs (rgb)
+@app.route('/knob_led_all/<id>/<red>/<green>/<blue>', methods=['GET'])
+def knob_led_all(id, red, green, blue):
+    global ids
+    command = ids["knob"][0] + "/4 " + str(red) + "\n" + \
+              ids["knob"][0] + "/5 " + str(green) + "\n" + \
+              ids["knob"][0] + "/6 " + str(blue) + "\n"
+    serial_conversation(command.encode())
+    resp = make_response('OK')
+    resp.headers['Content-Type'] = 'text/plain'
+    return resp
 
 # Environment sensor
 ## temp
