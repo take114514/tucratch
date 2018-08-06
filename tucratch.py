@@ -129,32 +129,38 @@ def respons_parse(input):
     elif input['status'] == 200:
         id = input['id']
         port = input['port']
-        if re.compile(ids["distance"][0]).match(id) and port == 1:
-            datas['distance'] = str(input.get('data'))
-        elif re.compile(ids["knob"][0]).match(id) and port == 1:
-            datas['knob_value'] = str(input.get('data'))
-        elif re.compile(ids["knob"][0]).match(id) and port == 2:
-            datas['knob_button'] = str(input.get('data'))
-        elif re.compile(ids["environment"][0]).match(id) and port == 1:
-            datas['environment_temp'] = str(input.get('data'))
-        elif re.compile(ids["environment"][0]).match(id) and port == 2:
-            datas['environment_humid'] = str(input.get('data'))
-        elif re.compile(ids["environment"][0]).match(id) and port == 3:
-            datas['environment_pascal'] = str(input.get('data'))
-        elif re.compile(ids["environment"][0]).match(id) and port == 4:
-            datas['environment_light'] = str(input.get('data'))
-        elif re.compile(ids["environment"][1]).match(id) and port == 1:
-            datas['environment_2_temp'] = str(input.get('data'))
-        elif re.compile(ids["environment"][1]).match(id) and port == 2:
-            datas['environment_2_humid'] = str(input.get('data'))
-        elif re.compile(ids["environment"][1]).match(id) and port == 3:
-            datas['environment_2_pascal'] = str(input.get('data'))
-        elif re.compile(ids["environment"][1]).match(id) and port == 4:
-            datas['environment_2_light'] = str(input.get('data'))
-        elif re.compile(ids["co2sensor"][0]).match(id) and port == 1:
-            datas['co2sensor_value'] = str(input.get('data'))
-        elif re.compile(ids["phsensor"][0]).match(id) and port == 1:
-            datas['phsensor_value'] = str(input.get('data'))
+        if len(ids["distance"][0]) > 0:
+            if re.compile(ids["distance"][0]).match(id) and port == 1:
+                datas['distance'] = str(input.get('data'))
+        if len(ids["knob"][0]) > 0:
+            if re.compile(ids["knob"][0]).match(id) and port == 1:
+                datas['knob_value'] = str(input.get('data'))
+            elif re.compile(ids["knob"][0]).match(id) and port == 2:
+                datas['knob_button'] = str(input.get('data'))
+        if len(ids["environment"][0]) > 0:
+            if re.compile(ids["environment"][0]).match(id) and port == 1:
+                datas['environment_temp'] = str(input.get('data'))
+            elif reompile(ids["environment"][0]).match(id) and port == 2:
+                datas['environment_humid'] = str(input.get('data'))
+            elif re.compile(ids["environment"][0]).match(id) and port == 3:
+                datas['environment_pascal'] = str(input.get('data'))
+            elif re.compile(ids["environment"][0]).match(id) and port == 4:
+                datas['environment_light'] = str(input.get('data'))
+        if len(ids["environment"][0]) > 1:
+            elif re.compile(ids["environment"][1]).match(id) and port == 1:
+                datas['environment_2_temp'] = str(input.get('data'))
+            elif re.compile(ids["environment"][1]).match(id) and port == 2:
+                datas['environment_2_humid'] = str(input.get('data'))
+            elif re.compile(ids["environment"][1]).match(id) and port == 3:
+                datas['environment_2_pascal'] = str(input.get('data'))
+            elif re.compile(ids["environment"][1]).match(id) and port == 4:
+                datas['environment_2_light'] = str(input.get('data'))
+        if len(ids["co2sensor"][0]) > 0:
+            if re.compile(ids["co2sensor"][0]).match(id) and port == 1:
+                datas['co2sensor_value'] = str(input.get('data'))
+        if len(ids["phsensor"][0]) > 0:
+            if re.compile(ids["phsensor"][0]).match(id) and port == 1:
+                datas['phsensor_value'] = str(input.get('data'))
 
 
 '''-----Main Activity-----'''
