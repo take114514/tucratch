@@ -147,7 +147,7 @@ def respons_parse(input):
             elif re.compile(ids["environment"][0]).match(id) and port == 4:
                 datas['environment_light'] = str(input.get('data'))
         if len(ids["environment"][0]) > 1:
-            elif re.compile(ids["environment"][1]).match(id) and port == 1:
+            if re.compile(ids["environment"][1]).match(id) and port == 1:
                 datas['environment_2_temp'] = str(input.get('data'))
             elif re.compile(ids["environment"][1]).match(id) and port == 2:
                 datas['environment_2_humid'] = str(input.get('data'))
