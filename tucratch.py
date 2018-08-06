@@ -40,10 +40,11 @@ def serial_conversation(transmit_data):
     while ser.out_waiting > 0:
         sleep(0.001)
 
-    sleep(0.01)
+    wait_count = 0
 
-    while ser.in_waiting > 0:
-        while True:
+    while True:
+        if ser.in_waiting > 0:
+            wait_count = 0
             c = ser.read(1);
             if len(c) == 0:
                 break
@@ -57,7 +58,11 @@ def serial_conversation(transmit_data):
                     serial_cache = ""
             elif c[0] < b'~' and c[0] > b'!':
                 serial_cache += c[0]
-        sleep(0.01)
+        elif ser.in_waiting == 0:
+            sleep(0.001)
+            wait_count += 1
+            if wait_count > 10:
+                break
 
 def respons_parse(input):
     global datas
@@ -269,7 +274,7 @@ def postport():
         ser.close()
     else:
         global ser
-        ser = serial.Serial(port, 9600,  timeout=0)
+        ser = serial.Serial(port, 115200,  timeout=0)
     return redirect("http://127.0.0.1:8081/", code=302)
 
 if __name__ == "__main__":
