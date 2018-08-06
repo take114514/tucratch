@@ -2,14 +2,14 @@
     "extensionName": "tucratch",
     "extensionPort": 8081,
     "blockSpecs": [
-        ["w", "LEDあかをつける(0~255) %n", "led_red", 10],
-        ["w", "LEDみどりをつける(0~255) %n", "led_green", 10],
-        ["w", "LEDあおをつける(0~255) %n", "led_blue", 10],
-        ["w", "LEDをつける(0~255) あか: %n みどり: %n あお: %n", "led_all", 0, 0, 0],
-        ["w", "つまみのLEDあかをつける(0~255) %n", "knob_led_red", 10],
-        ["w", "つまみのLEDみどりをつける(0~255) %n", "knob_led_green", 10],
-        ["w", "つまみのLEDあおをつける(0~255) %n", "knob_led_blue", 10],
-        ["w", "つまみのLEDをつける(0~255) あか: %n みどり: %n あお: %n", "knob_led_all", 0, 0, 0],
+        ["w", "LEDあかをつける %n (0~255)", "led_red", 10],
+        ["w", "LEDみどりをつける %n (0~255)", "led_green", 10],
+        ["w", "LEDあおをつける %n (0~255)", "led_blue", 10],
+        ["w", "LEDをつける あか %n みどり %n あお %n (0~255)", "led_all", 0, 0, 0],
+        ["w", "つまみのLEDあかをつける %n (0~255)", "knob_led_red", 10],
+        ["w", "つまみのLEDみどりをつける %n (0~255)", "knob_led_green", 10],
+        ["w", "つまみのLEDあおをつける %n (0~255)", "knob_led_blue", 10],
+        ["w", "つまみのLEDをつける あか %n みどり %n あお %n (0~255)", "knob_led_all", 0, 0, 0],
         ["w", "つまみをみる", "knob_value", 0],
         ["w", "つまみをリセットする", "knob_reset", 0],
         ["r", "つまみのかいてんすう", "knob_value_data"],
@@ -25,7 +25,7 @@
         ["r", "あかるさ [lx]", "environment_light_data"],
         ["w", "きょりをはかる", "distance", 0],
         ["r", "きょり [mm]", "distance_data"],
-        ["w", "モーターをまわす(-255~255) %n", "motor_rotate", 0],
+        ["w", "モーターをまわす %n (-255~255)", "motor_rotate", 0],
         ["w", "モーターをとめる", "motor_stop", 0]
     ]
 }
