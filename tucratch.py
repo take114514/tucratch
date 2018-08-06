@@ -472,7 +472,7 @@ def motor_stop(id):
 
 # DC motor (multiple)
 @app.route('/motor_rotate/<id>/<num>/<value>', methods=['GET'])
-def motor_multiple_rotate(id, num, data):
+def motor_multiple_rotate(id, num, value):
     global ids
     command = ids["motor"][int(num) - 1] + "/1 " + str(data) + "\n"
     serial_conversation(command.encode())
