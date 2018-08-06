@@ -6,6 +6,22 @@ import serial
 import serial.tools.list_ports
 import json
 from flask import Flask, render_template, request, redirect, make_response
+from time import sleep
+import re
+
+'''------Global values------'''
+
+serial_cache = ""
+
+datas = {
+    "knob": "0",
+    "knobbutton": "0",
+    "temp": "0",
+    "humid": "0",
+    "pascal": "0",
+    "light": "0",
+    "distance": "0"
+}
 
 '''------Functions------'''
 
@@ -16,6 +32,53 @@ def serial_ports():
     for port in ports:
         port_list.append(port.device)
     return port_list
+
+def serial_conversation(transmit_data):
+    global serial_cache
+    ser.write(transmit_data)
+
+    while ser.out_waiting > 0:
+        sleep(0.001)
+
+    sleep(0.01)
+
+    while ser.in_waiting > 0:
+        while True:
+            c = ser.read(1);
+            if len(c) == 0:
+                break
+            elif c[0] == b'\x0a':
+                try:
+                    respons_parse(json.loads(serial_cache))
+                    serial_cache = ""
+                except:
+                    print "### JSON parse error! ###"
+                    print serial_cache
+                    serial_cache = ""
+            elif c[0] < b'~' and c[0] > b'!':
+                serial_cache += c[0]
+        sleep(0.01)
+
+def respons_parse(input):
+    global datas
+    if input['status'] == 200:
+        id = input['id']
+        port = input['port']
+        print input
+        if re.compile("100a-").search(id) and port == 1:
+            datas['distance'] = str(input.get('data'))
+        if re.compile("1007-").search(id) and port == 1:
+            datas['knob'] = str(input.get('data'))
+        if re.compile("1007-").search(id) and port == 2:
+            datas['knobbutton'] = str(input.get('data'))
+        if re.compile("1003-").search(id) and port == 1:
+            datas['temp'] = str(input.get('data'))
+        if re.compile("1003-").search(id) and port == 2:
+            datas['humid'] = str(input.get('data'))
+        if re.compile("1003-").search(id) and port == 3:
+            datas['pascal'] = str(input.get('data'))
+        if re.compile("1003-").search(id) and port == 4:
+            datas['light'] = str(input.get('data'))
 
 
 '''-----Main Activity-----'''
@@ -28,15 +91,6 @@ if getattr(sys, 'frozen', False):
 else:
     app = Flask(__name__)
 
-datas = {
-    "knob": "0",
-    "knobbutton": "0",
-    "temp": "0",
-    "humid": "0",
-    "pascal": "0",
-    "light": "0",
-    "distance": "0"
-}
 
 '''-----Web UI-----'''
 
@@ -80,8 +134,7 @@ def led(port, id, data):
     elif port == "blue":
         led = 3
     command = "/1001-0/" + str(led) + " " + str(data) + "\n"
-    ser.write(command.encode())
-    ser.readline()
+    serial_conversation(command.encode())
 
     resp = make_response('OK')
     resp.headers['Content-Type'] = 'text/plain'
@@ -90,15 +143,10 @@ def led(port, id, data):
 
 @app.route('/leds/<id>/<red>/<green>/<blue>', methods=['GET'])
 def leds(id, red, green, blue):
-    command1 = "/1001-0/1 " + str(red) + "\n"
-    ser.write(command1.encode())
-    ser.readline()
-    command2 = "/1001-0/2 " + str(green) + "\n"
-    ser.write(command2.encode())
-    ser.readline()
-    command3 = "/1001-0/3 " + str(blue) + "\n"
-    ser.write(command3.encode())
-    ser.readline()
+    command = "/1001-0/1 " + str(red) + "\n" \
+              "/1001-0/2 " + str(green) + "\n" \
+              "/1001-0/3 " + str(blue) + "\n"
+    serial_conversation(command.encode())
 
     resp = make_response('OK')
     resp.headers['Content-Type'] = 'text/plain'
@@ -109,11 +157,7 @@ def leds(id, red, green, blue):
 def knob(id):
     command = "/1007-0/1\n"
     global datas
-    ser.write(command.encode())
-    line = ser.readline()
-    data = json.loads(line)
-    datas['knob'] = str(data.get('data'))
-    print line
+    serial_conversation(command.encode())
 
     resp = make_response('OK')
     resp.headers['Content-Type'] = 'text/plain'
@@ -123,11 +167,7 @@ def knob(id):
 @app.route('/knobbutton/<id>', methods=['GET'])
 def knobbutton(id):
     command = "/1007-0/2\n"
-    ser.write(command.encode())
-    line = ser.readline()
-    data = json.loads(line)
-    datas['knobbutton'] = str(data.get('data'))
-    print line
+    serial_conversation(command.encode())
 
     resp = make_response('OK')
     resp.headers['Content-Type'] = 'text/plain'
@@ -136,9 +176,7 @@ def knobbutton(id):
 @app.route('/knobreset/<id>', methods=['GET'])
 def knobreset(id):
     command = "/1007-0/1 0\n"
-    ser.write(command.encode())
-    line = ser.readline()
-    print line
+    serial_conversation(command.encode())
 
     resp = make_response('OK')
     resp.headers['Content-Type'] = 'text/plain'
@@ -149,11 +187,7 @@ def knobreset(id):
 def temp(id):
     command = "/1003-0/1\n"
     global datas
-    ser.write(command.encode())
-    line = ser.readline()
-    data = json.loads(line)
-    datas['temp'] = str(data.get('data'))
-    print line
+    serial_conversation(command.encode())
 
     resp = make_response('OK')
     resp.headers['Content-Type'] = 'text/plain'
@@ -165,11 +199,7 @@ def temp(id):
 def humid(id):
     command = "/1003-0/2\n"
     global datas
-    ser.write(command.encode())
-    line = ser.readline()
-    data = json.loads(line)
-    datas['humid'] = str(data.get('data'))
-    print line
+    serial_conversation(command.encode())
 
     resp = make_response('OK')
     resp.headers['Content-Type'] = 'text/plain'
@@ -181,11 +211,7 @@ def humid(id):
 def pascal(id):
     command = "/1003-0/3\n"
     global datas
-    ser.write(command.encode())
-    line = ser.readline()
-    data = json.loads(line)
-    datas['pascal'] = str(data.get('data'))
-    print line
+    serial_conversation(command.encode())
 
     resp = make_response('OK')
     resp.headers['Content-Type'] = 'text/plain'
@@ -196,11 +222,7 @@ def pascal(id):
 def light(id):
     command = "/1003-0/4\n"
     global datas
-    ser.write(command.encode())
-    line = ser.readline()
-    data = json.loads(line)
-    datas['light'] = str(data.get('data'))
-    print line
+    serial_conversation(command.encode())
 
     resp = make_response('OK')
     resp.headers['Content-Type'] = 'text/plain'
@@ -210,8 +232,7 @@ def light(id):
 @app.route('/motor_rotate/<id>/<data>', methods=['GET'])
 def motor_rotate(id, data):
     command = "/1005-0/1 " + str(data) + "\n"
-    ser.write(command.encode())
-    ser.readline()
+    serial_conversation(command.encode())
 
     resp = make_response('OK')
     resp.headers['Content-Type'] = 'text/plain'
@@ -221,8 +242,7 @@ def motor_rotate(id, data):
 @app.route('/motor_stop/<id>', methods=['GET'])
 def motor_stop(id):
     command = "/1005-0/1 0\n"
-    ser.write(command.encode())
-    ser.readline()
+    serial_conversation(command.encode())
 
     resp = make_response('OK')
     resp.headers['Content-Type'] = 'text/plain'
@@ -233,11 +253,7 @@ def motor_stop(id):
 def distance(id):
     command = "/100a-0/1\n"
     global datas
-    ser.write(command.encode())
-    line = ser.readline()
-    data = json.loads(line)
-    datas['distance'] = str(data.get('data'))
-    print line
+    serial_conversation(command.encode())
 
     resp = make_response('OK')
     resp.headers['Content-Type'] = 'text/plain'
@@ -253,7 +269,7 @@ def postport():
         ser.close()
     else:
         global ser
-        ser = serial.Serial(port, 9600)
+        ser = serial.Serial(port, 9600,  timeout=0)
     return redirect("http://127.0.0.1:8081/", code=302)
 
 if __name__ == "__main__":
