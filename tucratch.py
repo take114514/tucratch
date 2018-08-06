@@ -182,7 +182,7 @@ def index():
 
 
 '''-----Scratch Comander-----'''
-#Polling
+# Polling
 @app.route('/poll', methods=['GET'])
 def res():
     global datas
@@ -206,7 +206,7 @@ def res():
     return resp
 
 
-#Reset & init
+# Reset & init
 @app.route('/reset_all', methods=['GET'])
 def reset_all():
     command = "/\n"
@@ -216,7 +216,7 @@ def reset_all():
     return resp
 
 
-#LEDs
+# LEDs
 @app.route('/led_red/<id>/<data>', methods=['GET'])
 def led_red(id, data):
     global ids
@@ -256,7 +256,7 @@ def led_all(id, red, green, blue):
     return resp
 
 
-#knob
+# Knob
 @app.route('/knob_value/<id>', methods=['GET'])
 def knob_value(id):
     global ids
@@ -285,8 +285,8 @@ def knob_reset(id):
     return resp
 
 
-#environment
-#temp
+# Environment sensor
+## temp
 @app.route('/environment_temp/<id>', methods=['GET'])
 def environment_temp(id):
     global ids
@@ -296,7 +296,7 @@ def environment_temp(id):
     resp.headers['Content-Type'] = 'text/plain'
     return resp
 
-#humid
+## humid
 @app.route('/environment_humid/<id>', methods=['GET'])
 def environment_humid(id):
     global ids
@@ -306,7 +306,7 @@ def environment_humid(id):
     resp.headers['Content-Type'] = 'text/plain'
     return resp
 
-#pressure
+## pressure
 @app.route('/environment_pascal/<id>', methods=['GET'])
 def environment_pascal(id):
     global ids
@@ -316,7 +316,7 @@ def environment_pascal(id):
     resp.headers['Content-Type'] = 'text/plain'
     return resp
 
-#light
+## light
 @app.route('/environment_light/<id>', methods=['GET'])
 def environment_light(id):
     global ids
@@ -327,8 +327,8 @@ def environment_light(id):
     return resp
 
 
-#environment (multiple)
-#temp
+# Environment sensor (multiple)
+## Temperature
 @app.route('/environment_temp/<id>/<num>', methods=['GET'])
 def environment_multiple_temp(id, num):
     global ids
@@ -338,7 +338,7 @@ def environment_multiple_temp(id, num):
     resp.headers['Content-Type'] = 'text/plain'
     return resp
 
-#humid
+## Humid
 @app.route('/environment_humid/<id>/<num>', methods=['GET'])
 def environment_multiple_humid(id, num):
     global ids
@@ -348,7 +348,7 @@ def environment_multiple_humid(id, num):
     resp.headers['Content-Type'] = 'text/plain'
     return resp
 
-#pressure
+## Pressure
 @app.route('/environment_pascal/<id>/<num>', methods=['GET'])
 def environment_multiple_pascal(id, num):
     global ids
@@ -358,7 +358,7 @@ def environment_multiple_pascal(id, num):
     resp.headers['Content-Type'] = 'text/plain'
     return resp
 
-#light
+## Luxmeter
 @app.route('/environment_light/<id>/<num>', methods=['GET'])
 def environment_multiple_light(id, num):
     global ids
@@ -369,7 +369,7 @@ def environment_multiple_light(id, num):
     return resp
 
 
-# distance sensor
+# Distance meter
 @app.route('/distance/<id>', methods=['GET'])
 def distance(id):
     global ids
@@ -380,7 +380,7 @@ def distance(id):
     return resp
 
 
-#motor
+# DC motor
 @app.route('/motor_rotate/<id>/<data>', methods=['GET'])
 def motor_rotate(id, data):
     global ids
@@ -400,7 +400,7 @@ def motor_stop(id):
     return resp
 
 
-#motor (multiple)
+# DC motor (multiple)
 @app.route('/motor_rotate/<id>/<num>/<value>', methods=['GET'])
 def motor_multiple_rotate(id, num, data):
     global ids
