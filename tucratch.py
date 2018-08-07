@@ -200,9 +200,9 @@ else:
 def index():
     if 'ser' in globals():
         if ser.is_open:
-            status = 'd-block'
+            status = 'ConnectingSuccess!'
     else:
-        status = 'd-none'
+        status = ''
     return render_template('index.html', ports=serial_ports(), status=status)
 
 
