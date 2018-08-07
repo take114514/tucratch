@@ -72,7 +72,7 @@ def serial_conversation(transmit_data):
             return
     serial_lock = 1
     print "## Serial conversation start. ##"
-    print ">>> " + transmit_data
+    print ">> " + transmit_data
     ser.write(transmit_data)
 
     while ser.out_waiting > 0:
@@ -87,7 +87,7 @@ def serial_conversation(transmit_data):
             bStr = ser.read(128);
             for c in bStr:
                 if c == b'\x0a':
-                    print "<<< " + serial_cache
+                    print "<< " + serial_cache
                     try:
                         response = json.loads(serial_cache)
                         chatch_lines += 1
@@ -116,7 +116,7 @@ def respons_parse(input):
     global ids
     global serialnums
 
-    print input
+    #print input
 
     if 'bridge' in input:
         devices = input['bridge']
@@ -200,9 +200,9 @@ else:
 def index():
     if 'ser' in globals():
         if ser.is_open:
-            status = 'd-block'
+            status = 'ConnectingSuccess!'
     else:
-        status = 'd-none'
+        status = ''
     return render_template('index.html', ports=serial_ports(), status=status)
 
 
@@ -222,7 +222,7 @@ def res():
                'environment_2_pascal_data ' + datas["environment_2_pascal"] + '\n' + \
                'environment_2_light_data ' + datas["environment_2_light"] + '\n'+ \
                'distance_data ' + datas["distance"] + '\n' + \
-               'co2phsensor_value_data ' + datas["co2sensor_value"] + '\n' + \
+               'co2sensor_value_data ' + datas["co2sensor_value"] + '\n' + \
                'phsensor_value_data ' + datas["phsensor_value"] + '\n'
 
     value = str(responce)
