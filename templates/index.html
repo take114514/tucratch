@@ -3,17 +3,30 @@
     <head>
         <meta charset="UTF-8">
         <title>PortSelector</title>
+        <link href="/static/bootstrap.min.css" rel="stylesheet">
     </head>
     <body>
-        <h1>PortSelect</h1>
+      <div class="mx-5 my-5">
+        <h1 class="text-center">Tucratch PortSelect</h1>
         <form method="post" action="/api/postport">
-            <select name="port-selector">
-                {% for port in ports %}
-                <option value={{port}}>{{port}}</option>
-                {% endfor %}
-            </select>
-            <input type="submit" value="select">
+          <div class="container">
+            <div class="row">
+              <div class="col-md-4 px-2 py-2">
+                <select name="port-selector" class="form-control">
+                    {% for port in ports %}
+                    <option value={{port}}>{{port}}</option>
+                    {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-8 px-2 py-2">
+                <input type="submit" value="select" class="btn btn-primary btn-lg btn-block">
+              </div>
+            </div>
+          </div>
         </form>
-        <p>{{status}}</p>
+        <div class="mx-2 alert alert-success {{status}}" role="alert">
+          ConnectingSuccess!
+        </div>
+      </div>
     </body>
 </html>
