@@ -14,7 +14,6 @@ import re
 '''------Global values------'''
 
 serial_cache = ""
-serial_lock = 0
 
 datas = {
     "knob_value": "0",
@@ -63,31 +62,19 @@ def serial_ports():
     return port_list
 
 def serial_conversation(transmit_data):
-    global serial_cache
-    global serial_lock
-    i = 0
-    while serial_lock > 0:
-        sleep(0.001)
-        i += 1
-        if i > 1000:
-            print "#### Serial is busy. ####"
-            return
-    serial_lock = 1
     while ser.in_waiting > 0:
-        sleep(0.02)
-    print "## Serial conversation start. ##"
+        sleep(0.002)
+    while ser.out_waiting > 0:
+        sleep(0.001)
     print ">> " + transmit_data
     ser.write(transmit_data)
     while ser.out_waiting > 0:
         sleep(0.001)
-    print "## Serial conversation end. ##"
-    serial_lock = 0
 
 def serial_parse():
     global serial_cache
     while True:
         sleep(0.01)
-        #print "## Serial reading ##"
         if ser.in_waiting > 0:
             bStr = ser.read(128);
             for c in bStr:
