@@ -96,19 +96,10 @@ def respons_parse(input):
     global ids
     global serialnums
 
-    #print input
-
     if 'bridge' in input:
         devices = input['bridge']
-        ids = {
-            "led": [],
-            "knob": [],
-            "environment": [],
-            "distance": [],
-            "motor": [],
-            "phsensor": [],
-            "co2sensor": []
-        }
+        for devlist in ids.values():
+            devlist = []
         for device in devices:
             if re.compile(serialnums["led"]).match(device):
                 ids['led'].append(device);
