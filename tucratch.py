@@ -7,6 +7,8 @@ import serial.tools.list_ports
 import json
 from flask import Flask, render_template, request, redirect, make_response
 from time import sleep
+import time
+import threading
 import re
 
 '''------Global values------'''
@@ -71,26 +73,28 @@ def serial_conversation(transmit_data):
             print "#### Serial is busy. ####"
             return
     serial_lock = 1
+    while ser.in_waiting > 0:
+        sleep(0.02)
     print "## Serial conversation start. ##"
     print ">> " + transmit_data
     ser.write(transmit_data)
-
     while ser.out_waiting > 0:
         sleep(0.001)
+    print "## Serial conversation end. ##"
+    serial_lock = 0
 
-    wait_count = 0
-    chatch_lines = 0
-
+def serial_parse():
+    global serial_cache
     while True:
+        sleep(0.01)
+        #print "## Serial reading ##"
         if ser.in_waiting > 0:
-            wait_count = 0
             bStr = ser.read(128);
             for c in bStr:
                 if c == b'\x0a':
                     print "<< " + serial_cache
                     try:
                         response = json.loads(serial_cache)
-                        chatch_lines += 1
                         serial_cache = ""
                     except:
                         print "#### JSON parse error! ####"
@@ -99,17 +103,6 @@ def serial_conversation(transmit_data):
                     respons_parse(response)
                 elif c < b'~' and c > b'!':
                     serial_cache += c[0]
-        elif ser.in_waiting == 0:
-            sleep(0.001)
-            wait_count += 1
-            if wait_count > 10 and chatch_lines > 0:
-                print "## Serial conversation end. ##"
-                serial_lock = 0
-                break
-            if wait_count > 500:
-                print "## Serial conversation time out. ##"
-                serial_lock = 0
-                break
 
 def respons_parse(input):
     global datas
@@ -192,6 +185,7 @@ if getattr(sys, 'frozen', False):
 else:
     app = Flask(__name__)
 
+serialThread = threading.Thread(target=serial_parse)
 
 '''-----Web UI-----'''
 
@@ -516,12 +510,14 @@ def co2sensor_value(id):
 
 @app.route('/api/postport', methods=['POST'])
 def postport():
+    global serialThread
     port = request.form.get('port-selector')
     if 'ser' in globals():
         ser.close()
     else:
         global ser
         ser = serial.Serial(port, 9600,  timeout=0)
+        serialThread.start()
     return redirect("http://127.0.0.1:8081/", code=302)
 
 if __name__ == "__main__":
