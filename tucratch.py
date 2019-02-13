@@ -38,7 +38,8 @@ serialnums = {
     "distance": "100a",
     "motor": "1005",
     "phsensor": "1008",
-    "co2sensor": "1009"
+    "co2sensor": "1009",
+    "motor2": "100b"
 }
 
 ids = {
@@ -47,6 +48,7 @@ ids = {
     "environment": [],
     "distance": [],
     "motor": [],
+    "motor2": [],
     "phsensor": [],
     "co2sensor": []
 }
@@ -115,6 +117,8 @@ def respons_parse(input):
                 ids['co2sensor'].append(device)
             if re.compile(serialnums["phsensor"]).match(device):
                 ids['phsensor'].append(device)
+            if re.compile(serialnums["motor2"]).match(device):
+                ids['motor2'].append(device)
         print ids
     elif input['status'] == 200:
         id = input['id']
@@ -446,7 +450,10 @@ def motor_stop(id):
 @app.route('/motor_rotate/<id>/<num>/<value>', methods=['GET'])
 def motor_multiple_rotate(id, num, value):
     global ids
-    command = ids["motor"][int(num) - 1] + "/1 " + str(value) + "\n"
+    if ids["motor2"]:
+        command = ids["motor2"][0] + "/" + str(num) + " " + str(value) + "\n"
+    else:
+        command = ids["motor"][int(num) - 1] + "/1 " + str(value) + "\n"
     serial_conversation(command.encode())
     resp = make_response('OK')
     resp.headers['Content-Type'] = 'text/plain'
@@ -455,7 +462,10 @@ def motor_multiple_rotate(id, num, value):
 @app.route('/motor_stop/<id>/<num>', methods=['GET'])
 def motor_multiple_stop(id, num):
     global ids
-    command = ids["motor"][int(num) - 1] + "/1 0\n"
+    if ids["motor2"]:
+        command = ids["motor2"][0] + "/" + str(num) + " 0\n"
+    else:
+        command = ids["motor"][int(num) - 1] + "/1 0\n"
     serial_conversation(command.encode())
     resp = make_response('OK')
     resp.headers['Content-Type'] = 'text/plain'
@@ -496,6 +506,7 @@ def postport():
         global ser
         ser = serial.Serial(port, 9600,  timeout=0)
         serialThread.start()
+        reset_all()
     return redirect("http://127.0.0.1:8081/", code=302)
 
 if __name__ == "__main__":
