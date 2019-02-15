@@ -14,7 +14,6 @@ import re
 '''------Global values------'''
 
 serial_cache = ""
-serial_lock = 0
 
 datas = {
     "knob_value": "0",
@@ -39,7 +38,8 @@ serialnums = {
     "distance": "100a",
     "motor": "1005",
     "phsensor": "1008",
-    "co2sensor": "1009"
+    "co2sensor": "1009",
+    "motor2": "100b"
 }
 
 ids = {
@@ -48,6 +48,7 @@ ids = {
     "environment": [],
     "distance": [],
     "motor": [],
+    "motor2": [],
     "phsensor": [],
     "co2sensor": []
 }
@@ -63,31 +64,19 @@ def serial_ports():
     return port_list
 
 def serial_conversation(transmit_data):
-    global serial_cache
-    global serial_lock
-    i = 0
-    while serial_lock > 0:
-        sleep(0.001)
-        i += 1
-        if i > 1000:
-            print "#### Serial is busy. ####"
-            return
-    serial_lock = 1
     while ser.in_waiting > 0:
-        sleep(0.02)
-    print "## Serial conversation start. ##"
+        sleep(0.002)
+    while ser.out_waiting > 0:
+        sleep(0.001)
     print ">> " + transmit_data
     ser.write(transmit_data)
     while ser.out_waiting > 0:
         sleep(0.001)
-    print "## Serial conversation end. ##"
-    serial_lock = 0
 
 def serial_parse():
     global serial_cache
     while True:
         sleep(0.01)
-        #print "## Serial reading ##"
         if ser.in_waiting > 0:
             bStr = ser.read(128);
             for c in bStr:
@@ -109,19 +98,10 @@ def respons_parse(input):
     global ids
     global serialnums
 
-    #print input
-
     if 'bridge' in input:
         devices = input['bridge']
-        ids = {
-            "led": [],
-            "knob": [],
-            "environment": [],
-            "distance": [],
-            "motor": [],
-            "phsensor": [],
-            "co2sensor": []
-        }
+        for devlist in ids.values():
+            devlist = []
         for device in devices:
             if re.compile(serialnums["led"]).match(device):
                 ids['led'].append(device);
@@ -137,6 +117,8 @@ def respons_parse(input):
                 ids['co2sensor'].append(device)
             if re.compile(serialnums["phsensor"]).match(device):
                 ids['phsensor'].append(device)
+            if re.compile(serialnums["motor2"]).match(device):
+                ids['motor2'].append(device)
         print ids
     elif input['status'] == 200:
         id = input['id']
@@ -468,7 +450,10 @@ def motor_stop(id):
 @app.route('/motor_rotate/<id>/<num>/<value>', methods=['GET'])
 def motor_multiple_rotate(id, num, value):
     global ids
-    command = ids["motor"][int(num) - 1] + "/1 " + str(value) + "\n"
+    if ids["motor2"]:
+        command = ids["motor2"][0] + "/" + str(num) + " " + str(value) + "\n"
+    else:
+        command = ids["motor"][int(num) - 1] + "/1 " + str(value) + "\n"
     serial_conversation(command.encode())
     resp = make_response('OK')
     resp.headers['Content-Type'] = 'text/plain'
@@ -477,7 +462,10 @@ def motor_multiple_rotate(id, num, value):
 @app.route('/motor_stop/<id>/<num>', methods=['GET'])
 def motor_multiple_stop(id, num):
     global ids
-    command = ids["motor"][int(num) - 1] + "/1 0\n"
+    if ids["motor2"]:
+        command = ids["motor2"][0] + "/" + str(num) + " 0\n"
+    else:
+        command = ids["motor"][int(num) - 1] + "/1 0\n"
     serial_conversation(command.encode())
     resp = make_response('OK')
     resp.headers['Content-Type'] = 'text/plain'
@@ -518,6 +506,7 @@ def postport():
         global ser
         ser = serial.Serial(port, 9600,  timeout=0)
         serialThread.start()
+        reset_all()
     return redirect("http://127.0.0.1:8081/", code=302)
 
 if __name__ == "__main__":
